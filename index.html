@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sticky Hero Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Reset-ish */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      line-height: 1.5;
+      color: #111;
+      background: #f4f4f4;
+    }
+
+    /* Layout wrapper (optional, just for centering content) */
+    .page {
+      min-height: 100vh;
+    }
+
+    /* HERO
+       - Hero participates in normal flow.
+       - Hero inner is sticky, so it pins to the top as you scroll.
+    */
+    .hero {
+      position: relative;
+      background: radial-gradient(circle at top, #333, #000);
+      color: #fff;
+      /* This just gives it some breathing room visually */
+      padding: 0;
+    }
+
+    .hero-inner {
+      position: sticky;
+      top: 0;
+      z-index: 1; /* BELOW content; content will use z-index: 2 */
+      min-height: 100vh; /* "Full-screen" hero feel */
+      padding: 4rem 1.5rem 6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      margin: 0 0 1rem;
+    }
+
+    .hero-description {
+      max-width: 42rem;
+      margin: 0 0 2rem;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.35);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-cta span {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* PAGE CONTENT
+       - Relative with higher z-index so it scrolls over the hero.
+    */
+    .page-content {
+      position: relative;
+      z-index: 2;
+      background: #fff;
+      box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .page-section {
+      padding: 4rem 1.5rem;
+      max-width: 60rem;
+      margin: 0 auto;
+      border-bottom: 1px solid #eee;
+    }
+
+    .page-section h2 {
+      margin-top: 0;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .page-section p {
+      margin: 0 0 1rem;
+      color: #333;
+    }
+
+    .page-section:last-of-type {
+      border-bottom: none;
+      padding-bottom: 5rem;
+    }
+
+    /* Just to make the scroll obvious */
+    .filler {
+      height: 40vh;
+      background: repeating-linear-gradient(
+        -45deg,
+        #fafafa,
+        #fafafa 10px,
+        #f0f0f0 10px,
+        #f0f0f0 20px
+      );
+      border-radius: 0.75rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="hero-kicker">Sticky Hero Demo</div>
+        <h1 class="hero-title">A Hero That Sticks, Content That Scrolls Over</h1>
+
+        <!-- Try removing this block entirely to test dynamic height -->
+        <p class="hero-description">
+          This hero remains pinned to the top of the viewport as you scroll,
+          but because it still participates in normal layout flow, the page
+          content starts beneath it and then scrolls up over the hero.
+          You can remove this description text and the hero height will shrink
+          accordingly without needing any JS.
+        </p>
+
+        <a href="#section-1" class="hero-cta">
+          Jump to content
+          <span>↓</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-content">
+      <section class="page-section" id="section-1">
+        <h2>Section 1: Intro</h2>
+        <p>
+          Scroll down and watch how this content passes over the hero. The hero
+          itself is implemented with <code>position: sticky</code> on its inner
+          wrapper and a higher <code>z-index</code> on the content.
+        </p>
+        <p>
+          Inspect the DOM to see that the hero is still above this section in
+          the normal document flow, so we don’t need any hard-coded
+          <code>margin-top</code> or <code>padding-top</code> based on a fixed
+          hero height.
+        </p>
+        <div class="filler"></div>
+      </section>
+
+      <section class="page-section">
+        <h2>Section 2: More Content</h2>
+        <p>
+          In your real project, if your sticky behavior isn’t working, check
+          for:
+        </p>
+        <ul>
+          <li>An ancestor with <code>overflow: hidden</code>/<code>auto</code> that can clip sticky.</li>
+          <li>Missing <code>top</code> value on the sticky element.</li>
+          <li>Not enough scrollable height in the sticky element’s container.</li>
+        </ul>
+        <div class="filler"></div>
+      </section>
+
+      <section class="page-section">
+        <h2>Section 3: Final Section</h2>
+        <p>
+          Delete or shorten the hero description in this demo and refresh to
+          confirm that the hero height changes and the content still lines up
+          correctly. That’s the core advantage of keeping the hero in the normal
+          layout and using <code>position: sticky</code> instead of fully
+          <code>position: fixed</code>.
+        </p>
+        <div class="filler"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
