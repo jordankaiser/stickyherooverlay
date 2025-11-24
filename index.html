@@ -25,21 +25,18 @@
     }
 
     /* HERO
-       - Hero participates in normal flow.
-       - Hero inner is sticky, so it pins to the top as you scroll.
+       - Hero uses position: fixed to stay pinned at the top
+       - Height is dynamic based on content
+       - JavaScript measures height and sets --hero-height CSS variable
     */
     .hero {
-      position: relative;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1; /* BELOW content; content will use z-index: 2 */
       background: radial-gradient(circle at top, #333, #000);
       color: #fff;
-      /* This just gives it some breathing room visually */
-      padding: 0;
-    }
-
-    .hero-inner {
-      position: sticky;
-      top: 0;
-      z-index: 1; /* BELOW content; content will use z-index: 2 */
       padding: 4rem 1.5rem 6rem;
       display: flex;
       flex-direction: column;
@@ -87,10 +84,12 @@
 
     /* PAGE CONTENT
        - Relative with higher z-index so it scrolls over the hero.
+       - Uses --hero-height CSS variable set by JavaScript for margin-top
     */
     .page-content {
       position: relative;
       z-index: 2;
+      margin-top: var(--hero-height, 100vh); /* Fallback to 100vh if JS hasn't run */
       background: #fff;
       box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.4);
     }
@@ -137,70 +136,128 @@
   <div class="page">
     <!-- HERO -->
     <header class="hero">
-      <div class="hero-inner">
-        <div class="hero-kicker">Sticky Hero Demo</div>
-        <h1 class="hero-title">A Hero That Sticks, Content That Scrolls Over</h1>
+      <div class="hero-kicker">Fixed Hero Demo</div>
+      <h1 class="hero-title">A Fixed Hero with Dynamic Height</h1>
 
-        <!-- Try removing this block entirely to test dynamic height -->
-        <p class="hero-description">
-          This hero remains pinned to the top of the viewport as you scroll,
-          but because it still participates in normal layout flow, the page
-          content starts beneath it and then scrolls up over the hero.
-          You can remove this description text and the hero height will shrink
-          accordingly without needing any JS.
-        </p>
+      <p class="hero-description">
+        This hero uses <code>position: fixed</code> to stay pinned at the top
+        while content scrolls over it. JavaScript measures the hero's actual height
+        and sets a CSS custom property (<code>--hero-height</code>) which is used
+        as <code>margin-top</code> on the content below. This allows the hero to
+        have dynamic height based on its content while keeping everything properly positioned.
+      </p>
 
-        <a href="#section-1" class="hero-cta">
-          Jump to content
-          <span>↓</span>
-        </a>
-      </div>
+      <p class="hero-description">
+        Try adding or removing text here and resizing the window - the layout
+        will automatically adjust without any hard-coded heights!
+      </p>
+
+      <a href="#section-1" class="hero-cta">
+        Jump to content
+        <span>↓</span>
+      </a>
     </header>
 
     <!-- PAGE CONTENT -->
     <main class="page-content">
       <section class="page-section" id="section-1">
-        <h2>Section 1: Intro</h2>
+        <h2>Section 1: How It Works</h2>
         <p>
           Scroll down and watch how this content passes over the hero. The hero
-          itself is implemented with <code>position: sticky</code> on its inner
-          wrapper and a higher <code>z-index</code> on the content.
+          uses <code>position: fixed</code> to stay pinned at the top, while this
+          content has a <code>margin-top</code> equal to the hero's dynamic height.
         </p>
         <p>
-          Inspect the DOM to see that the hero is still above this section in
-          the normal document flow, so we don’t need any hard-coded
-          <code>margin-top</code> or <code>padding-top</code> based on a fixed
-          hero height.
+          The <code>margin-top</code> is set using a CSS custom property
+          (<code>--hero-height</code>) that JavaScript updates whenever the hero's
+          height changes. This means you can add or remove content from the hero
+          and the layout will automatically adjust - no hard-coded values needed!
+        </p>
+        <p>
+          Open the browser console to see the hero height being calculated and
+          updated in real-time.
         </p>
         <div class="filler"></div>
       </section>
 
       <section class="page-section">
-        <h2>Section 2: More Content</h2>
+        <h2>Section 2: Technical Implementation</h2>
         <p>
-          In your real project, if your sticky behavior isn’t working, check
-          for:
+          This approach uses three key techniques:
         </p>
         <ul>
-          <li>An ancestor with <code>overflow: hidden</code>/<code>auto</code> that can clip sticky.</li>
-          <li>Missing <code>top</code> value on the sticky element.</li>
-          <li>Not enough scrollable height in the sticky element’s container.</li>
+          <li><strong>CSS Custom Property:</strong> The <code>--hero-height</code> variable is set on the document root and used in the CSS.</li>
+          <li><strong>ResizeObserver:</strong> Automatically detects when the hero's size changes (content added/removed, font loads, etc.).</li>
+          <li><strong>Z-index layering:</strong> Hero at <code>z-index: 1</code>, content at <code>z-index: 2</code> so it scrolls over the hero.</li>
         </ul>
+        <p>
+          This is more reliable than <code>position: sticky</code> when you need
+          the hero to remain pinned indefinitely and have dynamic height.
+        </p>
         <div class="filler"></div>
       </section>
 
       <section class="page-section">
-        <h2>Section 3: Final Section</h2>
+        <h2>Section 3: Testing Dynamic Height</h2>
         <p>
-          Delete or shorten the hero description in this demo and refresh to
-          confirm that the hero height changes and the content still lines up
-          correctly. That’s the core advantage of keeping the hero in the normal
-          layout and using <code>position: sticky</code> instead of fully
-          <code>position: fixed</code>.
+          Try these tests to see the dynamic height in action:
+        </p>
+        <ul>
+          <li>Open your browser's DevTools and edit the hero text directly in the DOM</li>
+          <li>Resize the browser window to see the height recalculate</li>
+          <li>Check the console to see the height updates being logged</li>
+        </ul>
+        <p>
+          The layout will automatically adjust without needing to refresh the page
+          or recalculate any hard-coded values. This makes it perfect for dynamic
+          content scenarios like CMS-driven hero sections.
         </p>
         <div class="filler"></div>
       </section>
     </main>
   </div>
+
+  <script>
+    /**
+     * Technical Approach:
+     * 1. Measure the hero element's actual height using getBoundingClientRect()
+     * 2. Set a CSS custom property (--hero-height) on the document root
+     * 3. The .page-content uses this variable for its margin-top
+     * 4. Listen for resize events to recalculate when window size changes
+     * 5. Use ResizeObserver to detect when hero content changes dynamically
+     */
+
+    function updateHeroHeight() {
+      const hero = document.querySelector('.hero');
+      if (!hero) return;
+
+      // Measure the actual height of the hero
+      const heroHeight = hero.getBoundingClientRect().height;
+
+      // Set the CSS custom property on the document root
+      document.documentElement.style.setProperty('--hero-height', `${heroHeight}px`);
+
+      console.log(`Hero height updated: ${heroHeight}px`);
+    }
+
+    // Run on initial load
+    updateHeroHeight();
+
+    // Update on window resize
+    window.addEventListener('resize', updateHeroHeight);
+
+    // Use ResizeObserver to detect when hero content changes
+    // (e.g., if text is added/removed dynamically, or fonts load)
+    if ('ResizeObserver' in window) {
+      const hero = document.querySelector('.hero');
+      const resizeObserver = new ResizeObserver(updateHeroHeight);
+      resizeObserver.observe(hero);
+    }
+
+    // Also run after fonts are loaded (in case font loading changes height)
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateHeroHeight);
+    }
+  </script>
 </body>
 </html>
